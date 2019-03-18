@@ -40,25 +40,25 @@ public class CurrentObservation implements Serializable {
     /**
      * Текущая информация о ветре
      */
-    @OneToOne(mappedBy = "currentObservation", /*fetch = FetchType.LAZY, */cascade = CascadeType.ALL, optional = false)
+    @OneToOne(mappedBy = "currentObservation", cascade = CascadeType.ALL, optional = false)
     private Wind wind;
 
     /**
      * Информация о текущем атмосферном давлении, влажности и видимости
      */
-    @OneToOne(mappedBy = "currentObservation", /*fetch = FetchType.LAZY, */cascade = CascadeType.ALL, optional = false)
+    @OneToOne(mappedBy = "currentObservation", cascade = CascadeType.ALL, optional = false)
     private Atmosphere atmosphere;
 
     /**
      * Информация о текущих астрономических условиях
      */
-    @OneToOne(mappedBy = "currentObservation", /*fetch = FetchType.LAZY, */cascade = CascadeType.ALL, optional = false)
+    @OneToOne(mappedBy = "currentObservation", cascade = CascadeType.ALL, optional = false)
     private Astronomy astronomy;
 
     /**
      * Текущее состояние погоды
      */
-    @OneToOne(mappedBy = "currentObservation", /*fetch = FetchType.LAZY, */cascade = CascadeType.ALL, optional = false)
+    @OneToOne(mappedBy = "currentObservation", cascade = CascadeType.ALL, optional = false)
     private Condition condition;
 
     /**

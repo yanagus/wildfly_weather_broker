@@ -38,6 +38,9 @@
         <taglibs.version>1.2.5</taglibs.version>
         <junit.version>4.12</junit.version>
         <mockito-core.version>2.24.5</mockito-core.version>
+        <easymock.version>3.6</easymock.version>
+        <arquillian-container-test-spi.version>1.4.1.Final</arquillian-container-test-spi.version>
+        <arquillian-junit-container.version>1.4.1.Final</arquillian-junit-container.version>
     </properties>
 
     <dependencyManagement>
@@ -205,6 +208,28 @@
                 <version>${mockito-core.version}</version>
                 <scope>test</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.easymock</groupId>
+                <artifactId>easymock</artifactId>
+                <version>${easymock.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.arquillian.container</groupId>
+                <artifactId>arquillian-container-test-spi</artifactId>
+                <version>${arquillian-container-test-spi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.arquillian.junit</groupId>
+                <artifactId>arquillian-junit-container</artifactId>
+                <version>${arquillian-junit-container.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+
         </dependencies>
     </dependencyManagement>
 
@@ -300,13 +325,6 @@
                                         <properties>
                                             <durable>true</durable>
                                             <entries>!!["java:/jms/queue/dbQueue"]</entries>
-                                        </properties>
-                                    </resource>
-                                    <resource>
-                                        <address>subsystem=messaging-activemq,server=default,jms-queue=dbWeather</address>
-                                        <properties>
-                                            <durable>true</durable>
-                                            <entries>!!["java:/jms/queue/dbWeather"]</entries>
                                         </properties>
                                     </resource>
 

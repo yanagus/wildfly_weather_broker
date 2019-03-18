@@ -47,9 +47,7 @@ public class DataReceiver implements MessageListener {
                 objectMessage = (ObjectMessage) message;
                 WeatherInfoView weatherInfoView = objectMessage.getBody(WeatherInfoView.class);
                 log.info("WeatherInfo message has been received");
-                if (weatherInfoView != null) {
-                    weatherService.saveWeather(weatherInfoView);
-                }
+                weatherService.saveWeather(weatherInfoView);
             } else {
                 log.warn("Message of wrong type: " + message.getClass().getName());
                 throw new IllegalArgumentException("Message must be of type ObjectMessage");
