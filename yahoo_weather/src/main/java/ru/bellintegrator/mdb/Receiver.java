@@ -2,6 +2,7 @@ package ru.bellintegrator.mdb;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.bellintegrator.exception.WeatherException;
 import ru.bellintegrator.service.YahooService;
 import ru.bellintegrator.view.City;
 
@@ -15,7 +16,7 @@ import javax.ejb.MessageDriven;
 import javax.ejb.ActivationConfigProperty;
 
 /**
- * Получатель сообщения от модуля admin_api
+ * Получатель сообщения из очереди от модуля admin_api
  */
 @MessageDriven(name = "Receiver", activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "java:/jms/queue/yahoo"),
@@ -35,18 +36,17 @@ public class Receiver implements MessageListener {
      */
     @Override
     public void onMessage(Message message) {
-        ObjectMessage objectMessage = null;
         try {
-            if(message instanceof ObjectMessage) {
-                objectMessage = (ObjectMessage) message;
-                City city = objectMessage.getBody(City.class);
-                log.info("City message has been received");
-                yahooService.getWeather(city.getName().trim().toLowerCase().replaceAll(" ", ""),
-                            city.getRegion().trim().toLowerCase().replaceAll(" ", ""));
-            } else {
-                log.warn("Message of wrong type: " + message.getClass().getName());
-                throw new IllegalArgumentException("Message must be of type ObjectMessage");
+            if (!(message instanceof ObjectMessage)) {
+                throw new WeatherException("Message must be of type ObjectMessage");
             }
+            ObjectMessage objectMessage = (ObjectMessage) message;
+            City city = objectMessage.getBody(City.class);
+            if (city == null) {
+                throw new WeatherException("Message must be of type City");
+            }
+            log.info("City message has been received");
+            yahooService.getWeather(city.getName(), city.getRegion());
         } catch (JMSException ex) {
             throw new RuntimeException("Error processing JMS message", ex);
         }

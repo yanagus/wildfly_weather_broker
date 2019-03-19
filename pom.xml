@@ -41,6 +41,9 @@
         <easymock.version>3.6</easymock.version>
         <arquillian-container-test-spi.version>1.4.1.Final</arquillian-container-test-spi.version>
         <arquillian-junit-container.version>1.4.1.Final</arquillian-junit-container.version>
+        <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+        <wildfly-maven-plugin.version>2.0.1.Final</wildfly-maven-plugin.version>
+        <wildfly.version>15.0.1.Final</wildfly.version>
     </properties>
 
     <dependencyManagement>
@@ -84,12 +87,14 @@
                 <version>${jboss-jms-api.version}</version>
                 <scope>provided</scope>
             </dependency>
+
             <dependency>
                 <groupId>javax.enterprise</groupId>
                 <artifactId>cdi-api</artifactId>
                 <version>${cdi-api.version}</version>
                 <scope>provided</scope>
             </dependency>
+
             <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>
@@ -246,7 +251,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.0</version>
+                    <version>${maven-compiler-plugin.version}</version>
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
@@ -256,9 +261,9 @@
                 <plugin>
                     <groupId>org.wildfly.plugins</groupId>
                     <artifactId>wildfly-maven-plugin</artifactId>
-                    <version>2.0.1.Final</version>
+                    <version>${wildfly-maven-plugin.version}</version>
                     <configuration>
-                        <version>15.0.1.Final</version>
+                        <version>${wildfly.version}</version>
                         <timeout>300</timeout>
                         <server-config>standalone-full.xml</server-config>
                         <add-user>

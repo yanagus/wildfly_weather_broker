@@ -3,13 +3,7 @@ package ru.bellintegrator.service;
 import com.caucho.hessian.server.HessianServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.bellintegrator.dao.astronomy.AstronomyDao;
-import ru.bellintegrator.dao.atmosphere.AtmosphereDao;
-import ru.bellintegrator.dao.condition.ConditionDao;
-import ru.bellintegrator.dao.currentobservation.CurrentObservationDao;
-import ru.bellintegrator.dao.forecast.ForecastDao;
-import ru.bellintegrator.dao.location.LocationDao;
-import ru.bellintegrator.dao.wind.WindDao;
+import ru.bellintegrator.dao.WeatherDao;
 import ru.bellintegrator.model.Astronomy;
 import ru.bellintegrator.model.Atmosphere;
 import ru.bellintegrator.model.Condition;
@@ -41,37 +35,11 @@ public class WeatherServiceImpl extends HessianServlet implements WeatherService
 
     private final Logger log = LoggerFactory.getLogger(WeatherServiceImpl.class);
 
-    private LocationDao locationDao;
-    private AtmosphereDao atmosphereDao;
-    private AstronomyDao astronomyDao;
-    private ConditionDao conditionDao;
-    private WindDao windDao;
-    private CurrentObservationDao currentObservationDao;
-    private ForecastDao forecastDao;
-    private MapperFacade mapperFacade;
-
+    @Inject
+    private WeatherDao weatherDao;
 
     @Inject
-    public WeatherServiceImpl(LocationDao locationDao,
-                              AtmosphereDao atmosphereDao,
-                              AstronomyDao astronomyDao,
-                              ConditionDao conditionDao,
-                              WindDao windDao,
-                              CurrentObservationDao currentObservationDao,
-                              ForecastDao forecastDao,
-                              MapperFacade mapperFacade) {
-        this.locationDao = locationDao;
-        this.atmosphereDao = atmosphereDao;
-        this.astronomyDao = astronomyDao;
-        this.conditionDao = conditionDao;
-        this.windDao = windDao;
-        this.currentObservationDao = currentObservationDao;
-        this.forecastDao = forecastDao;
-        this.mapperFacade = mapperFacade;
-    }
-
-    public WeatherServiceImpl() {
-    }
+    private MapperFacade mapperFacade;
 
     /**
      * {@inheritDoc}
@@ -79,11 +47,11 @@ public class WeatherServiceImpl extends HessianServlet implements WeatherService
     @Override
     @Transactional
     public WeatherInfoView getWeatherFromDB(String city) {
-        Location location = locationDao.findByCity(city);
+        Location location = weatherDao.findLocationByCity(city);
         if(location == null) {
             return null;
         }
-        CurrentObservation currentObservation = currentObservationDao.findByParameters(location.getWoeid());
+        CurrentObservation currentObservation = weatherDao.findCurrentObservationByWoeidAndDate(location.getWoeid());
         if(currentObservation == null) {
             return null;
         }
@@ -103,20 +71,20 @@ public class WeatherServiceImpl extends HessianServlet implements WeatherService
     @Override
     @Transactional
     public void saveWeather(WeatherInfoView weatherInfoView) {
-        Location locationFromDB = locationDao.findByWoeid(weatherInfoView.getLocation().getWoeid());
+        Location locationFromDB = weatherDao.findLocationByWoeid(weatherInfoView.getLocation().getWoeid());
         if (locationFromDB != null) {
             saveCurrentObservation(weatherInfoView.getCurrentObservation(), locationFromDB);
             if (!locationFromDB.getForecasts().isEmpty()) {
                 locationFromDB.getForecasts().clear();
             }
             saveForecasts(weatherInfoView.getForecasts(), locationFromDB);
-            log.info("Added new weather data to location");
+            log.info("Added new weather data to location {}", locationFromDB.getCity());
         } else {
             Location location = mapperFacade.map(weatherInfoView.getLocation(), Location.class);
-            locationDao.save(location);
+            weatherDao.saveLocation(location);
             saveCurrentObservation(weatherInfoView.getCurrentObservation(), location);
             saveForecasts(weatherInfoView.getForecasts(), location);
-            log.info("Saved new location and weather data to a database");
+            log.info("Saved new location {} and weather data to a database", location.getCity());
         }
     }
 
@@ -130,7 +98,7 @@ public class WeatherServiceImpl extends HessianServlet implements WeatherService
         for (ForecastView forecastView : forecasts) {
             Forecast forecast = mapperFacade.map(forecastView, Forecast.class);
             forecast.setLocation(location);
-            forecastDao.save(forecast);
+            weatherDao.saveForecast(forecast);
         }
     }
 
@@ -144,7 +112,7 @@ public class WeatherServiceImpl extends HessianServlet implements WeatherService
         if(currentObservationView.getAstronomy() != null && currentObservationView.getAtmosphere() != null &&
                 currentObservationView.getCondition() != null && currentObservationView.getWind() != null) {
             CurrentObservation newCurrentObservation = new CurrentObservation(location, currentObservationView.getPubDate());
-            currentObservationDao.save(newCurrentObservation);
+            weatherDao.saveCurrentObservation(newCurrentObservation);
 
             saveAstronomy(currentObservationView.getAstronomy(), newCurrentObservation);
             saveAtmosphere(currentObservationView.getAtmosphere(), newCurrentObservation);
@@ -162,7 +130,7 @@ public class WeatherServiceImpl extends HessianServlet implements WeatherService
     private void saveAstronomy(AstronomyView astronomyView, CurrentObservation currentObservation) {
         Astronomy astronomy = mapperFacade.map(astronomyView, Astronomy.class);
         astronomy.setCurrentObservation(currentObservation);
-        astronomyDao.save(astronomy);
+        weatherDao.saveAstronomy(astronomy);
     }
 
     /**
@@ -174,7 +142,7 @@ public class WeatherServiceImpl extends HessianServlet implements WeatherService
     private void saveAtmosphere(AtmosphereView atmosphereView, CurrentObservation currentObservation) {
         Atmosphere atmosphere = mapperFacade.map(atmosphereView, Atmosphere.class);
         atmosphere.setCurrentObservation(currentObservation);
-        atmosphereDao.save(atmosphere);
+        weatherDao.saveAtmosphere(atmosphere);
     }
 
     /**
@@ -186,7 +154,7 @@ public class WeatherServiceImpl extends HessianServlet implements WeatherService
     private void saveCondition(ConditionView conditionView, CurrentObservation currentObservation) {
         Condition condition = mapperFacade.map(conditionView, Condition.class);
         condition.setCurrentObservation(currentObservation);
-        conditionDao.save(condition);
+        weatherDao.saveCondition(condition);
     }
 
     /**
@@ -198,7 +166,7 @@ public class WeatherServiceImpl extends HessianServlet implements WeatherService
     private void saveWind(WindView windView, CurrentObservation currentObservation) {
         Wind wind = mapperFacade.map(windView, Wind.class);
         wind.setCurrentObservation(currentObservation);
-        windDao.save(wind);
+        weatherDao.saveWind(wind);
     }
 
     /**

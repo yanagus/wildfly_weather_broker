@@ -23,7 +23,7 @@ public class WeatherController {
 
     private Logger log = LoggerFactory.getLogger(WeatherController.class);
 
-    private WeatherService weatherService;
+    private final WeatherService weatherService;
 
     @Autowired
     public WeatherController(WeatherService weatherService) {

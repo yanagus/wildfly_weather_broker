@@ -1,4 +1,4 @@
 /**
  * Пакет для классов ошибок
  */
-package ru.bellintegrator.exceptionHandler;
+package ru.bellintegrator.exception;
