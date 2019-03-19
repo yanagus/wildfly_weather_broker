@@ -39,3 +39,4 @@ public interface MapperFacade {
      */
     <S, D> List<D> mapAsList(Iterable<S> source, Class<D> destinationClass);
 }
+

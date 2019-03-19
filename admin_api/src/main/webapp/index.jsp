@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -10,9 +11,9 @@
 <body>
     <h2>Enter city</h2>
 
-    <c:if test="${not empty exception.message}">
+    <c:if test="${not empty infoMessage}">
       <p style="color: red; font-weight: bold;">
-          <c:out value="${exception.message}"/>
+          <c:out value="${infoMessage}"/>
       </p>
     </c:if>
 
@@ -37,6 +38,14 @@
         </table>
         <p>
             <input id="submit" type="submit" value="Submit" />
+        </p>
+
+        <p>
+            <label style="color: green;width: 100%;text-align: left;">${infoMessage}</label>
+        </p>
+
+        <p>
+            <label style="color: red; width: 100%;text-align: left;">${errorMessage}</label>
         </p>
     </form>
 

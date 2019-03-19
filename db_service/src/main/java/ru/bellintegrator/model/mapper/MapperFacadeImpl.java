@@ -42,3 +42,4 @@ public class MapperFacadeImpl implements MapperFacade {
         return mapperFactory.getMapperFacade().mapAsList(source, destinationClass);
     }
 }
+
