@@ -1,4 +1,4 @@
-package ru.bellintegrator.model.mapper;
+package ru.bellintegrator.mapper;
 
 import java.util.List;
 

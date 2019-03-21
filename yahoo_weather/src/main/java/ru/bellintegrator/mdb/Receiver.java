@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import javax.jms.ObjectMessage;
 
 import javax.ejb.MessageDriven;
 import javax.ejb.ActivationConfigProperty;
@@ -36,17 +35,20 @@ public class Receiver implements MessageListener {
      */
     @Override
     public void onMessage(Message message) {
+        if(message == null){
+            throw new WeatherException("Message can not be null");
+        }
         try {
-            if (!(message instanceof ObjectMessage)) {
-                throw new WeatherException("Message must be of type ObjectMessage");
-            }
-            ObjectMessage objectMessage = (ObjectMessage) message;
-            City city = objectMessage.getBody(City.class);
-            if (city == null) {
+            if(!message.isBodyAssignableTo(City.class)) {
                 throw new WeatherException("Message must be of type City");
+            }
+            City city = message.getBody(City.class);
+            if (city == null) {
+                throw new WeatherException("City can not be null");
             }
             log.info("City message has been received");
             yahooService.getWeather(city.getName(), city.getRegion());
+
         } catch (JMSException ex) {
             throw new RuntimeException("Error processing JMS message", ex);
         }

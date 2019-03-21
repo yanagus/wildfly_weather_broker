@@ -3,7 +3,7 @@ package ru.bellintegrator.service;
 import ru.bellintegrator.view.WeatherInfoView;
 
 /**
- * Копия интерфейса, удаленно вызываемого через Hessian
+ * Копия интерфейса с методом, удаленно вызываемым через Hessian
  */
 public interface WeatherService {
 

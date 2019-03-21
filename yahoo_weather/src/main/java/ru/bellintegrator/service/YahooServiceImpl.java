@@ -27,13 +27,13 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Сервис погоды
+ * Сервис получения погоды с Yahoo
  */
 @ApplicationScoped
 public class YahooServiceImpl implements YahooService {
 
     private final Logger log = LoggerFactory.getLogger(YahooServiceImpl.class);
-    RestTemplate restTemplate = new RestTemplate();
+    private RestTemplate restTemplate = new RestTemplate();
 
     @Inject
     private DataSender dataSender;
@@ -46,7 +46,7 @@ public class YahooServiceImpl implements YahooService {
      * @param region регион
      */
     @Override
-    public void getWeather(String city, String region) throws WeatherException {
+    public void getWeather(String city, String region) {
         String preparedCityName = prepareString(city);
         String preparedRegion = prepareString(region);
         HttpEntity<String> entity = encryptHeaders(preparedCityName, preparedRegion);

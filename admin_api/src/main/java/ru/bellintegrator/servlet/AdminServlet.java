@@ -35,18 +35,37 @@ public class AdminServlet extends HttpServlet {
      * Обработать данные формы
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         City city = new City(request.getParameter("name"), request.getParameter("region"));
-        if (city.getName() == null || city.getName().equals("")
-                || city.getRegion() == null || city.getRegion().equals("")) {
-            throw new WeatherException("City can not be blank");
+
+        if (isCityEmpty(city)) {
+            forwardException(request, response, "City or Region can not be blank");
+            return;
         }
         try {
             sender.sendMessage(city);
         } catch (WeatherException ex) {
             throw new ServletException(ex.getMessage());
         }
+        forwardSuccess(request, response, city);
+    }
 
+    /**
+     * Обновить страницу, если возникла ошибка
+     *
+     * @param attribute сообщение об ошибке
+     */
+    private void forwardException(HttpServletRequest request, HttpServletResponse response, String attribute) throws ServletException, IOException {
+        request.setAttribute("errorMessage", attribute);
+        request.getRequestDispatcher("/index.jsp").forward(request, response);
+    }
+
+    /**
+     * Загрузить страницу ответа в случае успешного обновления данных
+     *
+     * @param city город
+     */
+    private void forwardSuccess(HttpServletRequest request, HttpServletResponse response, City city) throws ServletException {
         response.setContentType("text/html; charset=UTF-8");
         try (PrintWriter writer = response.getWriter()){
             request.setAttribute("city", city);
@@ -54,5 +73,16 @@ public class AdminServlet extends HttpServlet {
         } catch (IOException | IllegalStateException ex) {
             throw new WeatherException(ex.getMessage(), ex);
         }
+    }
+
+    /**
+     * Проверка вводимых данных
+     *
+     * @param city город
+     * @return true, если данные введены
+     */
+    private boolean isCityEmpty(City city) {
+        return city.getName() == null || city.getName().trim().isEmpty()
+                || city.getRegion() == null || city.getRegion().trim().isEmpty();
     }
 }

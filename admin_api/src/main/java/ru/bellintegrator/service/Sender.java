@@ -22,6 +22,11 @@ public class Sender {
     @Inject
     private JMSContext context;
 
+    /**
+     * Отправить сообщение в очередь для модуля yahoo_service
+     *
+     * @param city город
+     */
     public void sendMessage(City city) {
         context.createProducer().send(queue, city);
         log.info("City message has been sent");

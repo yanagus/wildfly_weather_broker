@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import javax.jms.ObjectMessage;
 
 /**
  * Получатель сообщения с данными для сохранения в БД
@@ -35,15 +34,18 @@ public class DataReceiver implements MessageListener {
      */
     @Override
     public void onMessage(Message message) {
+        if(message == null){
+            throw new WeatherException("Message can not be null");
+        }
         try {
-            if (!(message instanceof ObjectMessage)) {
-                throw new WeatherException("Message must be of type ObjectMessage");
+            if(!message.isBodyAssignableTo(WeatherInfoView.class)) {
+                throw new WeatherException("Message must be of type WeatherInfoView");
             }
-            ObjectMessage objectMessage = (ObjectMessage) message;
-            WeatherInfoView weatherInfoView = objectMessage.getBody(WeatherInfoView.class);
+            WeatherInfoView weatherInfoView = message.getBody(WeatherInfoView.class);
+
             if (weatherInfoView == null || weatherInfoView.getLocation() == null
                     || weatherInfoView.getCurrentObservation() == null || weatherInfoView.getForecasts() == null) {
-                throw new WeatherException("Message must be of type WeatherInfoView");
+                throw new WeatherException("WeatherInfoView can not be null");
             }
             log.info("WeatherInfoView message has been received");
             weatherService.saveWeather(weatherInfoView);

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.bellintegrator.service.WeatherService;
+import ru.bellintegrator.view.ResponseMessage;
 import ru.bellintegrator.view.WeatherInfoView;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -55,7 +56,7 @@ public class WeatherController {
      */
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleNotFoundException(NotFoundException ex) {
-        return ex.getMessage();
+    public ResponseMessage handleNotFoundException(NotFoundException ex) {
+        return new ResponseMessage(ex.getMessage());
     }
 }

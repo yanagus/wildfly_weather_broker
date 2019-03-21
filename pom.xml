@@ -37,10 +37,9 @@
         <jackson.version>2.9.8</jackson.version>
         <taglibs.version>1.2.5</taglibs.version>
         <junit.version>4.12</junit.version>
+        <mockito.version>2.0.2-beta</mockito.version>
         <mockito-core.version>2.24.5</mockito-core.version>
         <easymock.version>3.6</easymock.version>
-        <arquillian-container-test-spi.version>1.4.1.Final</arquillian-container-test-spi.version>
-        <arquillian-junit-container.version>1.4.1.Final</arquillian-junit-container.version>
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
         <wildfly-maven-plugin.version>2.0.1.Final</wildfly-maven-plugin.version>
         <wildfly.version>15.0.1.Final</wildfly.version>
@@ -209,6 +208,13 @@
 
             <dependency>
                 <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>${mockito-core.version}</version>
                 <scope>test</scope>
@@ -220,21 +226,6 @@
                 <version>${easymock.version}</version>
                 <scope>test</scope>
             </dependency>
-
-            <dependency>
-                <groupId>org.jboss.arquillian.container</groupId>
-                <artifactId>arquillian-container-test-spi</artifactId>
-                <version>${arquillian-container-test-spi.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.arquillian.junit</groupId>
-                <artifactId>arquillian-junit-container</artifactId>
-                <version>${arquillian-junit-container.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-
         </dependencies>
     </dependencyManagement>
 
