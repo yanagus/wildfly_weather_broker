@@ -41,11 +41,7 @@ public class AdminServlet extends HttpServlet {
             forwardException(request, response, "City or Region can not be blank");
             return;
         }
-        try {
-            sender.sendMessage(city);
-        } catch (WeatherException ex) {
-            throw new ServletException(ex.getMessage(), ex);
-        }
+        sender.sendMessage(city);
         forwardSuccess(request, response, city);
     }
 
