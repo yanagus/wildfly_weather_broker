@@ -1,4 +1,4 @@
-package ru.bellintegrator.mdb;
+package ru.bellintegrator.jms;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +25,9 @@ public class ReceiverTest {
 
     @Mock
     private YahooService yahooService;
+
+    @Mock
+    private DataSender dataSender;
 
     @InjectMocks
     private Receiver receiver;

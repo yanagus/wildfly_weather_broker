@@ -7,15 +7,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import ru.bellintegrator.exception.WeatherException;
-import ru.bellintegrator.mdb.DataSender;
 import ru.bellintegrator.view.WeatherInfoView;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -35,41 +34,29 @@ public class YahooServiceImpl implements YahooService {
     private final Logger log = LoggerFactory.getLogger(YahooServiceImpl.class);
     private RestTemplate restTemplate = new RestTemplate();
 
-    @Inject
-    private DataSender dataSender;
-
     /**
-     * Получить данные о погоде с сервиса Yahoo.
+     * Получить данные о погоде от сервиса Yahoo.
      *
      * Запрос отправляется в зашифрованном виде
      * @param city город
      * @param region регион
      */
-    @Override
-    public void getWeather(String city, String region) {
+    public WeatherInfoView getWeather(String city, String region) {
         String preparedCityName = prepareString(city);
         String preparedRegion = prepareString(region);
         HttpEntity<String> entity = encryptHeaders(preparedCityName, preparedRegion);
-
-        ResponseEntity<WeatherInfoView> result = restTemplate.exchange(
-                "https://weather-ydn-yql.media.yahoo.com/forecastrss?location=" + preparedCityName + "," + preparedRegion + "&format=json&u=c",
-                HttpMethod.GET, entity, WeatherInfoView.class);
-
-        if(result.getStatusCodeValue() != 200) {
-            throw new WeatherException("Service is temporarily unavailable. Try later");
+        WeatherInfoView weatherInfo;
+        try {
+            ResponseEntity<WeatherInfoView> result = restTemplate.exchange(
+                    "https://weather-ydn-yql.media.yahoo.com/forecastrss?location=" + preparedCityName + "," + preparedRegion + "&format=json&u=c",
+                    HttpMethod.GET, entity, WeatherInfoView.class);
+            checkYahooResponseCode(result);
+            weatherInfo = result.getBody();
+            checkWeatherInfoView(weatherInfo);
+        } catch (HttpClientErrorException ex) {
+            throw new WeatherException("Service is temporarily unavailable. Try later", ex);
         }
-
-        WeatherInfoView weatherInfo = result.getBody();
-        if(weatherInfo == null || weatherInfo.getLocation() == null || weatherInfo.getLocation().getWoeid() == null) {
-            throw new WeatherException("Wrong city or region! Try again");
-        }
-        if(weatherInfo.getCurrentObservation() == null || weatherInfo.getCurrentObservation().getPubDate() == null
-                || weatherInfo.getForecasts() == null || weatherInfo.getForecasts().isEmpty()
-                || weatherInfo.getForecasts().get(0) == null) {
-            throw new WeatherException("Service is temporarily unavailable. Try later");
-        }
-
-        dataSender.sendMessage(weatherInfo);
+        return weatherInfo;
     }
 
     /**
@@ -161,11 +148,11 @@ public class YahooServiceImpl implements YahooService {
 
     /**
      * Подготовить строку для запроса.
-     * В запросе город и регион должны быть написаны слитно без пробелов маленькими буквами, например:
-     * название города - newyork
-     * регион - ny
-     * название города - saratov
-     * регион - saratovoblast
+     * В запросе город и регион должны быть написаны слитно без пробелов строчными буквами, например:
+     * название города New York - newyork
+     * регион, штат NY - ny
+     * название города Saratov - saratov
+     * регион Saratov Oblast - saratovoblast
      *
      *
      * @param string строка с названием города или региона
@@ -176,5 +163,32 @@ public class YahooServiceImpl implements YahooService {
             throw new WeatherException("City can not be blank");
         }
         return string.trim().toLowerCase().replaceAll(" ", "");
+    }
+
+    /**
+     * Проверить код HTTP ответа Yahoo
+     *
+     * @param result ответ Yahoo
+     */
+    private void checkYahooResponseCode(ResponseEntity<WeatherInfoView> result) {
+        if(result.getStatusCodeValue() != 200) {
+            throw new WeatherException("Service is temporarily unavailable. Try later");
+        }
+    }
+
+    /**
+     * Проверить корректность присланных данных от Yahoo
+     *
+     * @param weatherInfo данные о погоде от Yahoo
+     */
+    private void checkWeatherInfoView(WeatherInfoView weatherInfo) {
+        if(weatherInfo == null || weatherInfo.getLocation() == null || weatherInfo.getLocation().getWoeid() == null) {
+            throw new WeatherException("Wrong city or region! Try again");
+        }
+        if(weatherInfo.getCurrentObservation() == null || weatherInfo.getCurrentObservation().getPubDate() == null
+                || weatherInfo.getForecasts() == null || weatherInfo.getForecasts().isEmpty()
+                || weatherInfo.getForecasts().get(0) == null) {
+            throw new WeatherException("Service is temporarily unavailable. Try later");
+        }
     }
 }

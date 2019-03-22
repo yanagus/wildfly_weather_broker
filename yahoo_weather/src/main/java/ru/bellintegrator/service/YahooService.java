@@ -1,5 +1,7 @@
 package ru.bellintegrator.service;
 
+import ru.bellintegrator.view.WeatherInfoView;
+
 /**
  * Сервис получения погоды с weather.yahoo.com
  */
@@ -10,6 +12,6 @@ public interface YahooService {
      * @param city город
      * @param region регион
      */
-    void getWeather(String city, String region);
+    WeatherInfoView getWeather(String city, String region);
 
 }

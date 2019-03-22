@@ -1,11 +1,13 @@
-package ru.bellintegrator.mdb;
+package ru.bellintegrator.jms;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.bellintegrator.exception.WeatherException;
 import ru.bellintegrator.service.YahooService;
 import ru.bellintegrator.view.City;
+import ru.bellintegrator.view.WeatherInfoView;
 
+import javax.ejb.EJBException;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -28,8 +30,13 @@ public class Receiver implements MessageListener {
     @Inject
     private YahooService yahooService;
 
+    @Inject
+    private DataSender dataSender;
+
     /**
-     * Получить сообщение
+     * Получить сообщение с названием города из очереди от модуля admin_api,
+     * передать название города в YahooService для получения данных о погоде,
+     * передать данные о погоде в класс DataSender для отправки сообщения в очередь для сохранения в базу данных
      *
      * @param message пришедшее сообщение
      */
@@ -47,10 +54,11 @@ public class Receiver implements MessageListener {
                 throw new WeatherException("City can not be null");
             }
             log.info("City message has been received");
-            yahooService.getWeather(city.getName(), city.getRegion());
-
-        } catch (JMSException ex) {
+            WeatherInfoView weatherInfo = yahooService.getWeather(city.getName(), city.getRegion());
+            dataSender.sendMessage(weatherInfo);
+        } catch (JMSException | EJBException ex) {
             throw new RuntimeException("Error processing JMS message", ex);
         }
+
     }
 }

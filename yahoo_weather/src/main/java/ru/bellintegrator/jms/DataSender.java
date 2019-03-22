@@ -1,4 +1,4 @@
-package ru.bellintegrator.mdb;
+package ru.bellintegrator.jms;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

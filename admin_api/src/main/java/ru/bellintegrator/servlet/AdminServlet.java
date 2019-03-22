@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
  * Сервлет для обработки запроса на обновление погоды
@@ -45,7 +44,7 @@ public class AdminServlet extends HttpServlet {
         try {
             sender.sendMessage(city);
         } catch (WeatherException ex) {
-            throw new ServletException(ex.getMessage());
+            throw new ServletException(ex.getMessage(), ex);
         }
         forwardSuccess(request, response, city);
     }
@@ -65,14 +64,9 @@ public class AdminServlet extends HttpServlet {
      *
      * @param city город
      */
-    private void forwardSuccess(HttpServletRequest request, HttpServletResponse response, City city) throws ServletException {
-        response.setContentType("text/html; charset=UTF-8");
-        try (PrintWriter writer = response.getWriter()){
-            request.setAttribute("city", city);
-            getServletContext().getRequestDispatcher("/city.jsp").forward(request, response);
-        } catch (IOException | IllegalStateException ex) {
-            throw new WeatherException(ex.getMessage(), ex);
-        }
+    private void forwardSuccess(HttpServletRequest request, HttpServletResponse response, City city) throws ServletException, IOException {
+        request.setAttribute("city", city);
+        getServletContext().getRequestDispatcher("/city.jsp").forward(request, response);
     }
 
     /**

@@ -1,4 +1,4 @@
-package ru.bellintegrator.mdb;
+package ru.bellintegrator.jms;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
